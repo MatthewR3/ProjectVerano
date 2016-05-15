@@ -14,7 +14,7 @@ Here are some of the conventions for Python I will be enforcing:
 8. Separate blocks of functions that perform separate functions by 5 empty lines.
 9. Add comments before a function explaining what that function should do and include any external docs (links)
 10. Add comments explaining complex code before the line in question. Only add inline comments if they are very short
-11. Always add test cases inside an 'if __name__ == "__main__":' clause. There should almost never be code left in the global space.
+11. Always add test cases inside an `if __name__ == "__main__":` clause. There should almost never be code left in the global space.
 12. Debugging print statements should be deleted or commented out before a commit, depending on how complex the statement is.
 13. Only type comments in all capital letters if it indicates a critical error
 14. For any heavily mathematical function or module, include a variable index above the section to indicate the purpose of each variable
