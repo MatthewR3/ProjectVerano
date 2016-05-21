@@ -20,4 +20,3 @@ Here are some of the conventions for Python I will be enforcing:
 13. Only type comments in all capital letters if it indicates a critical error
 14. For any heavily mathematical function or module, include a variable index above the section to indicate the purpose of each variable
 15. Use string concatenation instead of string replacement for clarity.
->>>>>>> origin/master
