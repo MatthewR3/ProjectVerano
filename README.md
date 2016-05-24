@@ -3,6 +3,16 @@
 
 This is the repository for all of our code for the project. Please make sure you commit after any changes, because I hate dealing with conflicts.
 
+# Accessing the Demo
+
+1. Install flask (pip install flask in cmd)
+2. Run server.py
+3. Go to 127.0.0.1:5000 in a browser
+
+Note that the demo only uses the start and end date values as parameters. The train date and algorithms don't change anything. When we complete an estimation algorithm, I will hook it up and it will display with the other selected algorithms.
+
+# Python Conventions
+
 Here are some of the conventions for Python I will be enforcing:
 
 1. Indentation is done with TABS. NOT SPACES. Refer to PEP 8 for indentation practices.
