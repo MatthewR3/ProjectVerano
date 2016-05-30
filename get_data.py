@@ -27,7 +27,7 @@ def get_hist_sp(start_date, end_date):
 			if date > start_date and date < end_date:
 				data += {"date": row[0], 
 						 #"open": float(row[1]), 
-						 "close": float(row[4])},
+						 "actual": float(row[4])},
 	f.close()
 	return data
 
@@ -41,6 +41,30 @@ def get_hist_share(symbol, start_date, end_date):
 
 
 
+# Combines an arbitrary number of lists containing dictionaries representing price data by date into one
+# NOTE: All lists should have the same number of entries and the dictionaries should be in the form as in the examples given below
+# Examples:
+# [{"date": "1-1-1990", "actual": 100}] + [{"date": "1-1-1990", "mean": 200}] --> [{"date": "1-1-1990", "actual": 100, "mean": 200}]
+# [{"date": "1-1-1990", "actual": 100}, {"date": "1-2-1990", "actual": 200}] + ["mean", {"date": "1-1-1990", "mean": 300}, {"date": "1-2-1990", "mean": 400}]
+# --> [{"date": "1-1-1990", "actual": 100, "mean": 3200}, {"date": "1-2-1990", "actual": 200, "mean": 400}]
+def combine_data(*args):
+	combined = args[0]
+	for arg in args[1:]:
+		for dct in arg:
+			dct_algo = dct.items()[1][0]
+			dct_value = dct.items()[1][1]
+			# O(n^2) runtime - faster way?
+			for comb_dct in combined:
+				if dct["date"] == comb_dct["date"]:
+					comb_dct[dct_algo] = dct_value
+	return combined
+
+
+
 if __name__ == "__main__":
 	# print get_hist_share("AAPL", "2014-04-25", "2014-04-29")
-	print get_hist_sp("2016-05-10", "2016-05-20")
+	#print get_hist_sp("2016-05-10", "2016-05-20")
+	lst1 = [{"date": "1-1-1990", "actual": 100}, {"date": "1-2-1990", "actual": 200}]
+	lst2 = [{"date": "1-1-1990", "mean": 300}, {"date": "1-2-1990", "mean": 400}]
+	lst3 = [{"date": "1-1-1990", "dev": 300}, {"date": "1-2-1990", "dev": 400}]
+	print combine_data(lst1, lst2, lst3)

@@ -9,7 +9,8 @@
 	<body>
 		<div id="sidebar">
 			<h1>Controls</h1>
-			<p>Start Date</p>
+			<input id="defaults" type="button" value="Use Defaults" onclick="fill_defaults()">
+			<p id="start_date_text">Start Date</p>
 			<input class="date" id="start_date" type="text" placeholder="1-1-1990 to Today" onfocus="this.placeholder=''" onblur="this.placeholder='1-1-1990 to Today'">
 			<div class="date_div" id="start_date_div">
 				<div class="date_month" id="start_date_month">
@@ -251,14 +252,12 @@
 			</div>
 			<p id="algorithms">Algorithms</p>
 			<ul>
-				<li value="1">Actual Performance</li>
-				<li value="1">Slope Analysis</li>
-				<li value="2">Peak / Trough Analysis</li>
-				<li value="3">Moving Average</li>
+				<li class="algorithm" value="0">Actual Performance</li>
+				<li class="algorithm" value="1">Slope Analysis</li>
+				<li class="algorithm" value="2">Peak / Trough Analysis</li>
+				<li class="algorithm" value="3">Moving Average</li>
 			</ul>
-			<input type="submit" value="Generate" onClick="draw_line_graph()">
-			<!-- jQuery AJAX relic -->
-			{# <input type="submit" value="Generate" onClick="ajax_get_data('2015-05-10', '2015-05-20')"> #}
+			<input id="generate" type="submit" value="Generate" onClick="draw_line_graph()">
 		</div><!--
 		--><div id="display">
 		</div>

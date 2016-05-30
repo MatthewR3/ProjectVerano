@@ -17,9 +17,105 @@ $(document).ready(function() {
 		}
 	});
 
+	$(".date").keyup(function() {
+		validate_input();
+	});
+
+	$("li").click(function() {
+		validate_input();
+	});
+
+	validate_input();
+
 });
 
-// Date format is YYYY-MM-DD
+function fill_defaults() {
+	// Fills in default date values
+	$("#start_date").val("1-1-1995");
+	$("#end_date").val("3-1-2005");
+	$("#train_date").val("1-1-2005");
+
+	// Clears algorithm inputs then fills in first 2
+	$("li").css("border-right", "none");
+	$("li").css("padding-left", "0");
+	$("li").slice(0, 2).css("border-right", "10px solid #9CBCD6");
+	$("li").slice(0, 2).css("padding-left", "10px");
+
+	validate_input();
+}
+
+function validate_input() {
+	var all_valid = true;
+
+	// Checks that dates are formatted correctly
+	var date_regex = /^\d{1,2}-\d{1,2}-\d{4}$/;
+	$(".date").each(function() {
+		if (date_regex.test($(this).val())) $(this).prev().css("color", "#555");
+		else {
+			$(this).prev().css("color", "#FF8C8C");
+			all_valid = false;
+		}
+	});
+
+	// Checks if dates are in correct order : start_date < train_date < end_date
+	if (all_valid) {
+		var dates = parse_dates();
+		var start_date = new Date(dates["start_date"]);
+		var end_date = new Date(dates["end_date"]);
+		var train_date = new Date(dates["train_date"]);
+		if (start_date > end_date) {
+			$("#start_date").prev().css("color", "#FF8C8C");
+			$("#end_date").prev().css("color", "#FF8C8C");
+			all_valid = false;
+		}
+		if (train_date > end_date) {
+			$("#train_date").prev().css("color", "#FF8C8C");
+			$("#end_date").prev().css("color", "#FF8C8C");
+			all_valid = false;
+		}
+		if (start_date > train_date) {
+			$("#start_date").prev().css("color", "#FF8C8C");
+			$("#train_date").prev().css("color", "#FF8C8C");
+			all_valid = false;
+		}
+	}
+
+	// Checks if any algorithm is selected
+	var selected = false;
+	$("li").each(function() {
+		if ($(this).css("border-right-width") == "10px") {
+			selected = true;
+		}
+	});
+
+	if (selected) {
+		$("#algorithms").css("color", "#555");
+	}
+	else {
+		$("#algorithms").css("color", "#FF8C8C");
+		all_valid = false;
+	}
+
+	if (all_valid) {
+		console.log("Valid");
+		$("#generate").prop("disabled", false);
+		$("#generate").css("color", "");
+		$("#generate").css("border-color", "");
+		$("#generate").css("pointer-events", "auto");
+	}
+	else {
+		console.log("Invalid");
+		$("#generate").prop("disabled", true);
+		$("#generate").css("color", "#DDD");
+		$("#generate").css("border-color", "#DDD");
+		$("#generate").css("pointer-events", "none");
+	}
+
+	return all_valid;
+}
+
+// Input date format is MM-DD-YYY
+// Output date format is YYYY-MM-DD
 function parse_dates() {
 
 	start_date = $("#start_date").val();
@@ -44,23 +140,11 @@ function parse_dates() {
 	return {start_date, end_date, train_date};
 }
 
-// AJAX relic
-// Returns historical data
-// function ajax_get_data(start_date, end_date) {
-// 	$.ajax({
-// 		url: "/ajax/get_data/",
-// 		type: "POST",
-// 		data: {"start_date": start_date, "end_date": end_date},
-// 		success: function(data){
-// 			console.log("Ajax call return")
-// 			return data;
-// 		},
-// 		failure: function(){
-// 			alert("ERROR: Failure to receive data");
-// 		},
-// 	});
-
-// }
+function full_algo_name(code) {
+	if (code == "actual") return "Actual Performance";
+	else if (code == "slope") return "Slope Analysis";
+	return code
+}
 
 function draw_bar_graph() {
 
@@ -83,24 +167,25 @@ function draw_bar_graph() {
 
 function draw_line_graph() {
 
+	if (!validate_input()) {
+		alert("Please enter valid inputs before testing");
+		return;
+	}
+
+	// Retrieves and parses data
+
 	var dates = parse_dates();
-	//console.log(dates);
 	var start_date = dates["start_date"];
 	var end_date = dates["end_date"];
 	var train_date = dates["train_date"];
 
-	//var start_date = "2016-05-03";
-	//var end_date = "2016-05-18";
-
-	// Prints out selected algorithm values
+	// Collects selected algorithm values
+	var algorithms = [];
 	$("li").each(function() {
 		if ($(this).css("border-right-width") == "10px") {
-			//console.log($(this).val());
+			algorithms.push($(this).val());
 		}
 	});
-
-	// var data = ajax_get_data("2016-05-10", "2016-05-20");
-	// console.log("After ajax call");
 
 	// Test data
 	// var data = [{date: "20111001",	"A": 63.4, "B": 62.7, "C": 72.2},
@@ -112,6 +197,14 @@ function draw_line_graph() {
 	// 		{date: "20111007",	"A": 57.9, "B": 56.7, "C": 82.3},
 	// 		{date: "20111008",	"A": 61.8, "B": 56.8, "C": 78.9},
 	// 		{date: "20111009",	"A": 69.3, "B": 56.7, "C": 68.8}];
+
+
+
+	// Sets up SVG elements
+
+	// Clears the display
+	$("#display").empty();
+	$("#display").append('<div class="spinner"><div class="double-bounce1"></div><div class="double-bounce2"></div></div>');
 
 	// Sets the dimensions of the canvas / graph
 	var max_x = $("#display").width();
@@ -152,18 +245,11 @@ function draw_line_graph() {
 	    .x(function(d) { return x(d.date); })
 	    .y(function(d) { return y(d.close); });
 
-	// Adds the svg canvas
-	var svg = d3.select("#display").append("svg")
-	    .attr("width", width + margin.left + margin.right)
-	    .attr("height", height + margin.top + margin.bottom)
-			.append("g")
-	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
+	// Gets the data
 
-	// Get the data
-
-	var request_data = {"start_date": start_date, "end_date": end_date};
+	var request_data = {"start_date": start_date, "end_date": end_date, "train_date": train_date, "algorithms": algorithms};
 	var data;
 
 	// Note: make sure to stringify objects before sending request
@@ -173,7 +259,17 @@ function draw_line_graph() {
 
 
 
-		// Use the data
+		// Uses the data
+
+		// Clears the display
+		$("#display").empty();
+
+		// Adds the svg canvas
+		var svg = d3.select("#display").append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+			.append("g")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 		// ?
 		color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
@@ -231,7 +327,7 @@ function draw_line_graph() {
 
 		// Adds algorithm and its text (text appears .35em above and 3px to the right of the end)
 		algorithm.append("text")
-			.datum(function(d) { return {name: "S&P 500 Actual", value: d.values[0]}; })
+			.datum(function(d) { return {name: full_algo_name(d.name), value: d.values[0]}; })
 			.attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.close) + ")"; })
 			.attr("x", 3)
 			.attr("dy", ".35em")

@@ -4,6 +4,7 @@ from flask import request
 import json
 
 import get_data as gd
+import algorithms as algo
 
 app = Flask(__name__)
 
@@ -16,15 +17,35 @@ def demo():
 
 
 @app.route("/ajax/get_data/", methods=["POST"])
-def get_sp_data():
-	start_date = "2016-05-10"
-	end_date = "2016-05-20"
+def get_all_data():
 	# Converts request.data (JSON string) to python dict
 	params = json.loads(request.data)
 	#print params
 	start_date = params["start_date"]
 	end_date = params["end_date"]
-	data = gd.get_hist_sp(start_date, end_date)
+	train_date = params["train_date"]
+	algorithms = params["algorithms"]
+	print algorithms
+
+	actual_data = gd.get_hist_sp(start_date, end_date)
+	# Actual Performance - code: actual
+	if 0 in algorithms:
+		print 0
+		data = actual_data
+	# Slope Analysis - code: slope
+	if 1 in algorithms:
+		algo_data = algo.slope(start_date, end_date, train_date)
+		data = gd.combine_data(data, algo_data)
+	# Peak / Trough Analysis
+	if 2 in algorithms:
+		pass
+	# Moving Average
+	if 3 in algorithms:
+		pass
+
+	# Basic test data
+	# data = [{"date": "1995-01-01", "close": 500, "1": 600}, {"date": "1995-01-02", "close": 510, "1": 610}, {"date": "1995-01-03", "close": 520, "1": 620}]
+
 	#print json.dumps(data)
 	return json.dumps(data)
 
