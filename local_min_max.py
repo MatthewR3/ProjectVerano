@@ -1,7 +1,7 @@
 import get_data as gd
 
 
-# The following function allows the user to choose a tolerance for which to validate weather a peak or trough
+# The following function allows the user to choose a tolerance for which to validate whether a peak or trough
 # is actually a local min or max. To test a point's validity, we establish two boundaires. Boundary 1 is placed before the local
 # min or max. It will usually be the local min/max, or the starting point. The local min/max must be drop below or exceed this boundary
 # by the tolerance to become a potential local max or min. At this point, we continue to move along the graph, with boundary 2 being
