@@ -2,10 +2,10 @@ import get_data as gd
 
 
 # The following function allows the user to choose a tolerance for which to validate whether a peak or trough
-# is actually a local min or max. To test a point's validity, we establish two boundaires. Boundary 1 is placed before the local
-# min or max. It will usually be the local min/max, or the starting point. The local min/max must be drop below or exceed this boundary
-# by the tolerance to become a potential local max or min. At this point, we continue to move along the graph, with boundary 2 being
-# set equal to the local max or min. This boundary changes as we test different points. Once it is below or above our established
+# is actually a local min or max. To test a point's validity, we establish two boundaries. Boundary 1 is placed before the local
+# min or max. It will usually be the previous local min/max, or the starting point. The local min/max must be drop below or exceed this
+# boundary by the tolerance to become a potential local max or min. At this point, we continue to move along the graph, with boundary 2
+# being set equal to the local max or min. This boundary changes as we test different points. Once it is below or above our established
 # local max or min by the given tolerance, the function then adds the stored local max/min to its respective list, the boundaries
 # are reset, and the process starts over.
 # Returns results in format:
