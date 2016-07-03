@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="/static/demo.css">
+		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 		<script src="/static/demo.js"></script>
 		<script src="static/d3.min.js" charset="utf-8"></script>
@@ -254,8 +255,25 @@
 			<ul>
 				<li class="algorithm" value="0">Actual Performance</li>
 				<li class="algorithm" value="1">Slope Analysis</li>
-				<li class="algorithm" value="2">Peak / Trough Analysis</li>
-				<li class="algorithm" value="3">Moving Average</li>
+				<li class="algorithm disabled" value="2">Peak / Trough Analysis</li>
+				<li class="algorithm disabled" value="3">Moving Average</li>
+			</ul>
+			<p id="options">Options</p>
+			<ul>
+				<li class="options extrema-options" id="abs-extrema" value="0">Absolute Extrema</li>
+				<ul id="abs-options">
+					<li value="0">Actual Performance</li>
+					<li value="1">Slope Analysis</li>
+					<li value="2" class="disabled">Peak / Trough Analysis</li>
+					<li value="3" class="disabled">Moving Average</li>
+				</ul>
+				<li class="options extrema-options" id="loc-extrema" value="1">Local Extrema</li>
+				<ul id="loc-options">
+					<li value="0">Actual Performance</li>
+					<li value="1">Slope Analysis</li>
+					<li value="2" class="disabled">Peak / Trough Analysis</li>
+					<li value="3" class="disabled">Moving Average</li>
+				</ul>
 			</ul>
 			<input id="generate" type="submit" value="Generate" onClick="draw_line_graph()">
 		</div><!--

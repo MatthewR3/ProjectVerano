@@ -14,27 +14,23 @@ import get_data as gd
 This algorithm uses the average time between maxes and mins to estimate the frequency of reversals, and it uses the average slope between
 	time intervals along maxes and mins to estimate the slope between the maxes and mins
 '''
-def slope(start_date, end_date, train_date):
+def slope_analysis(start_date, end_date, train_date):
 	all_data = gd.get_hist_sp(start_date, end_date)
 	# print all_data
 	train_data = gd.get_hist_sp(start_date, train_date)
 	#print train_data
-	prices = []
+
+	# prices = []
 	# for keys, vals in enumerate(train_data):
 	# 	prices.append(vals["actual"])
 	# print prices
 
-	# Changes key name and adds 10 to value
+	# Changes key name and adds 50 to value
 	for dct in all_data:
-		dct["slope"] = dct.pop("actual") + 50
+		dct["slope_analysis"] = dct.pop("actual") + 50
 
 
 	return all_data
-
-
-
-
-
 
 
 

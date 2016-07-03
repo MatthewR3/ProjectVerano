@@ -9,7 +9,7 @@ import yahoo_finance as yf
 
 # Gets historical price data of the S&P 500 by parsing csv file
 def get_hist_sp(start_date, end_date):
-	
+
 	with open("sp500.csv", "rb") as f:
 		start_date = time.strptime(start_date, "%Y-%m-%d")
 		end_date = time.strptime(end_date, "%Y-%m-%d")
@@ -25,8 +25,8 @@ def get_hist_sp(start_date, end_date):
 			if date < start_date:
 				break
 			if date > start_date and date < end_date:
-				data += {"date": row[0], 
-						 #"open": float(row[1]), 
+				data += {"date": row[0],
+						 #"open": float(row[1]),
 						 "actual": float(row[4])},
 	f.close()
 	return data
@@ -45,11 +45,17 @@ def get_hist_share(symbol, start_date, end_date):
 # NOTE: All lists should have the same number of entries and the dictionaries should be in the form as in the examples given below
 # Examples:
 # [{"date": "1-1-1990", "actual": 100}] + [{"date": "1-1-1990", "mean": 200}] --> [{"date": "1-1-1990", "actual": 100, "mean": 200}]
-# [{"date": "1-1-1990", "actual": 100}, {"date": "1-2-1990", "actual": 200}] + ["mean", {"date": "1-1-1990", "mean": 300}, {"date": "1-2-1990", "mean": 400}]
+# [{"date": "1-1-1990", "actual": 100}, {"date": "1-2-1990", "actual": 200}] + [{"date": "1-1-1990", "mean": 300}, {"date": "1-2-1990", "mean": 400}]
 # --> [{"date": "1-1-1990", "actual": 100, "mean": 3200}, {"date": "1-2-1990", "actual": 200, "mean": 400}]
 def combine_data(*args):
-	combined = args[0]
-	for arg in args[1:]:
+	# Checks to see if arguments' list is empty
+	# Uses a non-empty list as original combined (makes sure date is defined)
+	for num in range(0, len(args)):
+		if args[num] != []:
+			combined = args[num]
+			break
+
+	for arg in args[num:]:
 		for dct in arg:
 			dct_algo = dct.items()[1][0]
 			dct_value = dct.items()[1][1]
@@ -63,8 +69,10 @@ def combine_data(*args):
 
 if __name__ == "__main__":
 	# print get_hist_share("AAPL", "2014-04-25", "2014-04-29")
-	#print get_hist_sp("2016-05-10", "2016-05-20")
-	lst1 = [{"date": "1-1-1990", "actual": 100}, {"date": "1-2-1990", "actual": 200}]
-	lst2 = [{"date": "1-1-1990", "mean": 300}, {"date": "1-2-1990", "mean": 400}]
-	lst3 = [{"date": "1-1-1990", "dev": 300}, {"date": "1-2-1990", "dev": 400}]
-	print combine_data(lst1, lst2, lst3)
+	# print get_hist_sp("2016-05-10", "2016-05-20")
+	lst1 = []
+	lst2 = [{"date": "1-1-1990", "actual": 100}, {"date": "1-2-1990", "actual": 200}]
+	lst3 = [{"date": "1-1-1990", "mean": 300}, {"date": "1-2-1990", "mean": 400}]
+	lst4 = [{"date": "1-1-1990", "dev": 300}, {"date": "1-2-1990", "dev": 400}]
+	print combine_data(lst1, lst2, lst3, lst4)
+	print combine_data(lst4, lst3, lst2, lst1)
