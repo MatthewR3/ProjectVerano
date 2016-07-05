@@ -244,28 +244,6 @@ function full_algo_name(code) {
 
 
 
-// Basic bar graph
-function draw_bar_graph() {
-
-	var data = [4, 8, 15, 16, 23, 42, 54, 56, 61, 65, 73, 83, 85, 94];
-
-	var max_x = $("#display").width();
-	console.log(max_x);
-
-	var x = d3.scale.linear()
-    	.domain([0, d3.max(data)])
-    	.range([0, max_x - 10]);
-
-	d3.select("#display")
-  		.selectAll("div")
-    .data(data)
-  		.enter().append("div")
-    .style("width", function(d) { return x(d) + "px"; })
-    .text(function(d) { return d; });
-}
-
-
-
 // Draws line graph of data retrieved via AJAX to server
 function draw_line_graph() {
 
@@ -327,22 +305,22 @@ function draw_line_graph() {
 	var max_x = $("#display").width();
 	var max_y = $("#display").height();
 	var margin = {top: 20, right: 180, bottom: 30, left: 80},
-    width = max_x - margin.left - margin.right,
-    height = max_y - margin.top - margin.bottom - 20;
+	width = max_x - margin.left - margin.right,
+	height = max_y - margin.top - margin.bottom - 20;
 
-    // console.log(width);
-    // console.log(height);
-    // console.log(margin);
+	// console.log(width);
+	// console.log(height);
+	// console.log(margin);
 
-    // Sets the date parsing function
+	// Sets the date parsing function
 	var parseDate = d3.time.format("%Y-%m-%d").parse;
 
 	// Set the ranges
 	var x = d3.time.scale()
-	    .range([0, width]);
+		.range([0, width]);
 
 	var y = d3.scale.linear()
-	    .range([height, 0]);
+		.range([height, 0]);
 
 	// Assigns colors to ordinal scale
 	// NOTE: Only range is set here; domain is specified after data is loaded
@@ -351,19 +329,19 @@ function draw_line_graph() {
 
 	// Define the axes
 	var xAxis = d3.svg.axis()
-	    .scale(x)
-	    .orient("bottom");
+		.scale(x)
+		.orient("bottom");
 
 	var yAxis = d3.svg.axis()
-	    .scale(y)
-	    .orient("left");
+		.scale(y)
+		.orient("left");
 
 	// Define the line
 	var line = d3.svg.line()
 		// Makes lines curvy
-	    .interpolate("basis")
-	    .x(function(d) { return x(d.date); })
-	    .y(function(d) { return y(d.close); });
+		.interpolate("basis")
+		.x(function(d) { return x(d.date); })
+		.y(function(d) { return y(d.close); });
 
 
 
@@ -414,10 +392,10 @@ function draw_line_graph() {
 		// Maps each algorithm to a different color in the color scale
 		var algorithms = color.domain().map(function(name) {
 			return {
-	  			name: name,
-	  			values: data.map(function(d) {
-	    			return {date: d.date, close: d[name]};
-	  			})
+				name: name,
+				values: data.map(function(d) {
+					return {date: d.date, close: d[name]};
+				})
 			};
 		});
 
@@ -431,9 +409,9 @@ function draw_line_graph() {
 
 		// Add the x-axis
 		svg.append("g")
-		  .attr("class", "x axis")
-		  .attr("transform", "translate(0," + height + ")")
-		  .call(xAxis);
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + height + ")")
+			.call(xAxis);
 
 		// Add the y-axis
 		svg.append("g")
@@ -501,17 +479,17 @@ function draw_line_graph() {
 
 		// Vertical line that moves with mouse
 		var vertical = d3.select("#display")
-	        .append("div")
-	        .attr("class", "remove vertical")
-	        .style("position", "absolute")
-	        .style("z-index", "19")
-	        .style("width", "1px")
-	        .style("height", height + "px")
-	        .style("top", margin["top"] + "px")
-	        .style("bottom", "30px")
-	        .style("left", "0")
+			.append("div")
+			.attr("class", "remove vertical")
+			.style("position", "absolute")
+			.style("z-index", "19")
+			.style("width", "1px")
+			.style("height", height + "px")
+			.style("top", margin["top"] + "px")
+			.style("bottom", "30px")
+			.style("left", "0")
 			.style("margin-left", "30%")
-	        .style("background", "#555");
+			.style("background", "#555");
 
 		// Mouse event listeners on display
   		d3.select("#display")

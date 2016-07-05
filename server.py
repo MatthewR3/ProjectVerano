@@ -106,7 +106,6 @@ def get_all_data():
 
 
 
-
 	all_data = {"data": data, "abs_min": abs_min, "abs_max": abs_max, "loc_min": loc_min, "loc_max": loc_max}
 
 	return json.dumps(all_data)
@@ -114,4 +113,4 @@ def get_all_data():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+	app.run(debug=True)
