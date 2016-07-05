@@ -56,6 +56,10 @@ input[type="submit"].disabled {
 	border-color: #BBB !important;
 }
 
+.hidden {
+	display: none;
+}
+
 /* Sidebar */
 
 #sidebar {
@@ -282,4 +286,49 @@ input[type="submit"]:active, input[type="button"]:active {
 
 .point {
 	fill: #555;
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.focus {
+	z-index: 999;
+}
+
+.focus circle {
+  fill: none;
+  stroke: #555;
+  stroke-width: 1px;
+  z-index: 999;
+
+}
+
+/* Visualization tooltip */
+
+#tooltip {
+	position: absolute;
+	min-width: 225px;
+	height: auto;
+	padding: 10px;
+	margin-left: 30%;
+	background-color: inherit;
+	border: 1px solid #94BAFF;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	pointer-events: none;
+}
+
+#tooltip p {
+	margin: 0;
+	font-family: sans-serif;
+	font-size: 16px;
+	line-height: 20px;
+}
+
+#tooltip span {
+	display: block;
+	width: 100%;
 }

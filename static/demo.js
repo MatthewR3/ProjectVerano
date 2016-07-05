@@ -317,7 +317,9 @@ function draw_line_graph() {
 
 	// Sets up SVG elements
 
-	// Clears the display
+
+
+	// Clears the display and adds loading animation
 	$("#display").empty();
 	$("#display").append('<div class="spinner"><div class="double-bounce1"></div><div class="double-bounce2"></div></div>');
 
@@ -358,6 +360,7 @@ function draw_line_graph() {
 
 	// Define the line
 	var line = d3.svg.line()
+		// Makes lines curvy
 	    .interpolate("basis")
 	    .x(function(d) { return x(d.date); })
 	    .y(function(d) { return y(d.close); });
@@ -379,6 +382,11 @@ function draw_line_graph() {
 		var abs_max = all_data["abs_max"];
 		var loc_min = all_data["loc_min"];
 		var loc_max = all_data["loc_max"];
+
+		// Sorts the data by descending date (later date --> larger index)
+		data.sort(function(a, b) {
+			return new Date(a.date) - new Date(b.date);
+		});
 
 
 
@@ -452,7 +460,7 @@ function draw_line_graph() {
 
 		// Adds algorithm's text (text appears .35em above and 3px to the right of the end)
 		algorithm.append("text")
-			.datum(function(d) { return {name: full_algo_name(d.name), value: d.values[0]}; })
+			.datum(function(d) { return {name: full_algo_name(d.name), value: d.values[d.values.length - 1]}; })
 			.attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.close) + ")"; })
 			.attr("x", 3)
 			.attr("dy", ".3em")
@@ -463,6 +471,120 @@ function draw_line_graph() {
 		// Functions for adding extrema
 		absolute_extrema(abs_min, abs_max, abs_extrema_options, svg, x, y, parseDate);
 		local_extrema(loc_min, loc_max, loc_extrema_options, svg, x, y, parseDate);
+
+
+
+		// Vertical line that moves with mouse
+		var vertical = d3.select("#display")
+	        .append("div")
+	        .attr("class", "remove")
+	        .style("position", "absolute")
+	        .style("z-index", "19")
+	        .style("width", "1px")
+	        .style("height", height + "px")
+	        .style("top", margin["top"] + "px")
+	        .style("bottom", "30px")
+	        .style("left", "0")
+			.style("margin-left", "30%")
+	        .style("background", "#555");
+
+		// Mouse event listeners on display
+  		d3.select("#display")
+			.on("mousemove", function(){
+				mousex = d3.mouse(this)[0];
+				vertical.style("left", mousex + "px");
+
+				// Update the tooltip position and value
+				var d = getNearestX(this, 80);
+				d3.select("#tooltip")
+					.style("left", d3.mouse(this)[0] + 20 + "px")
+					.style("top", d3.mouse(this)[1] - 50 + "px")
+					.classed("hidden", false);
+				d3.select("#tooltip-date")
+					.text($.format.date(d.date, "ddd MMM d, yyyy"));
+				d3.select("#tooltip-price")
+					.text(formatCurrency(d.actual));
+			})
+			.on("mouseover", function(){
+				mousex = d3.mouse(this)[0];
+				vertical.style("left", mousex + "px");
+
+				// Update the tooltip position and value
+				var d = getNearestX(this, 80);
+				d3.select("#tooltip")
+					.style("left", d3.mouse(this)[0] + 20 + "px")
+					.style("top", d3.mouse(this)[1] - 50 + "px")
+					.classed("hidden", false);
+				d3.select("#tooltip-date")
+					.text($.format.date(d.date, "ddd MMM d, yyyy"));
+				d3.select("#tooltip-price")
+					.text(formatCurrency(d.actual));
+			});
+
+
+
+		// Bisection function - returns index of array nearest to current x
+		var bisectDate = d3.bisector(function(d) {
+			return d.date;
+		}).left;
+
+		// Formatting functions
+		var formatValue = d3.format(",.2f");
+		var formatCurrency = function(d) { return "$" + formatValue(d); };
+
+		// Focus that displays circle at intersection of chart and vertical line
+		var focus = svg.append("g")
+			.attr("class", "focus")
+			.style("display", "none")
+
+		focus.append("circle")
+			.attr("r", 4.5);
+
+		// Shows text on left side of focus
+		// focus.append("text")
+		// 	.attr("x", -82)
+		// 	.attr("dy", ".35em");
+
+		svg.append("rect")
+			.attr("class", "overlay")
+			.attr("width", width)
+			.attr("height", height)
+			.on("mouseover", function() {
+				focus.style("display", null);
+			})
+			.on("mouseout", function() {
+				focus.style("display", null);
+			})
+			.on("mousemove", mousemove);
+
+		// Updates focus
+		function mousemove() {
+			var d = getNearestX(this);
+			// Note: Use x(d.date) for x translation if the point needs to be exactly on the date
+			// This implementation forces the focus circle to always follow the mouse (in sync with vertical line)
+			focus.attr("transform", "translate(" + d3.mouse(this)[0] + "," + y(d.actual) + ")");
+			focus.select("text").text(formatCurrency(d.actual));
+		}
+
+
+
+		// Bisects the mouse's x position to obtain the nearest value in the data array
+		function getNearestX(elem, offset) {
+			if (offset == null) offset = 0;
+			// Finds date at mouse
+			var x0 = x.invert(d3.mouse(elem)[0] - offset);
+			// Gets bisection (index) of date at mouse
+			var i = bisectDate(data, x0, 1);
+			// Gets date immediately before mouse and compares to date at mouse to see which one is closer
+			var d0 = data[i - 1];
+			var d1 = data[i];
+			var d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+			return d;
+		}
+
+
+
+
 	});
 }
 

@@ -6,6 +6,7 @@
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 		<script src="/static/demo.js"></script>
 		<script src="static/d3.min.js" charset="utf-8"></script>
+		<script src="static/jquery-dateFormat.min.js" charset="utf-8"></script>
 	</head>
 	<body>
 		<div id="sidebar">
@@ -278,6 +279,14 @@
 			<input id="generate" type="submit" value="Generate" onClick="draw_line_graph()">
 		</div><!--
 		--><div id="display">
+		</div>
+		<!-- Visualization tooltip -->
+		<div id="tooltip" class="hidden">
+			<p><strong id="tooltip-algorithm">Actual Performance</strong></p>
+			<p>
+				<span id="tooltip-date"></span>
+				<span id="tooltip-price"></span>
+			</p>
 		</div>
 	</body>
 </html>
