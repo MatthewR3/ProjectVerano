@@ -187,7 +187,7 @@ input[type="submit"], input[type="button"] {
 	height: 40px;
 	line-height: 38px;
 	margin-top: 30px;
-	margin-bottom: 30px;
+	margin-bottom: 50px;
 	margin-left: 30%;
 	margin-right: 30%;
 	border: 1px solid #888;
@@ -284,7 +284,11 @@ input[type="submit"]:active, input[type="button"]:active {
   stroke-width: 1.5px;
 }
 
-.point {
+.node circle {
+	fill: #555;
+}
+
+.node text {
 	fill: #555;
 }
 
@@ -314,21 +318,22 @@ input[type="submit"]:active, input[type="button"]:active {
 	padding: 10px;
 	margin-left: 30%;
 	background-color: inherit;
-	border: 1px solid #94BAFF;
+	border: 1px solid #555;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	pointer-events: none;
 }
 
-#tooltip p {
-	margin: 0;
+#tooltip p, #tooltip span {
+	margin: auto;
+	width: 100%;
 	font-family: sans-serif;
 	font-size: 16px;
 	line-height: 20px;
+	display: block;
 }
 
-#tooltip span {
-	display: block;
-	width: 100%;
+.tooltip-algorithm {
+	margin-top: 10px;
 }

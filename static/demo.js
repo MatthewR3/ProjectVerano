@@ -397,10 +397,10 @@ function draw_line_graph() {
 
 		// Adds the svg canvas and its inner g element (variable svg is the g element)
 		var svg = d3.select("#display").append("svg")
-		    .attr("width", width + margin.left + margin.right)
-		    .attr("height", height + margin.top + margin.bottom)
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
 		.append("g")
-		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 		// Applies the color scale to the domain (price at point in time)
 		// NOTE: Must use "!= date" since prices have different names depending on the dictionary
@@ -474,99 +474,14 @@ function draw_line_graph() {
 
 
 
-		// Vertical line that moves with mouse
-		var vertical = d3.select("#display")
-	        .append("div")
-	        .attr("class", "remove")
-	        .style("position", "absolute")
-	        .style("z-index", "19")
-	        .style("width", "1px")
-	        .style("height", height + "px")
-	        .style("top", margin["top"] + "px")
-	        .style("bottom", "30px")
-	        .style("left", "0")
-			.style("margin-left", "30%")
-	        .style("background", "#555");
-
-		// Mouse event listeners on display
-  		d3.select("#display")
-			.on("mousemove", function(){
-				mousex = d3.mouse(this)[0];
-				vertical.style("left", mousex + "px");
-
-				// Update the tooltip position and value
-				var d = getNearestX(this, 80);
-				d3.select("#tooltip")
-					.style("left", d3.mouse(this)[0] + 20 + "px")
-					.style("top", d3.mouse(this)[1] - 50 + "px")
-					.classed("hidden", false);
-				d3.select("#tooltip-date")
-					.text($.format.date(d.date, "ddd MMM d, yyyy"));
-				d3.select("#tooltip-price")
-					.text(formatCurrency(d.actual));
-			})
-			.on("mouseover", function(){
-				mousex = d3.mouse(this)[0];
-				vertical.style("left", mousex + "px");
-
-				// Update the tooltip position and value
-				var d = getNearestX(this, 80);
-				d3.select("#tooltip")
-					.style("left", d3.mouse(this)[0] + 20 + "px")
-					.style("top", d3.mouse(this)[1] - 50 + "px")
-					.classed("hidden", false);
-				d3.select("#tooltip-date")
-					.text($.format.date(d.date, "ddd MMM d, yyyy"));
-				d3.select("#tooltip-price")
-					.text(formatCurrency(d.actual));
-			});
-
-
+		// Formatting functions
+		var formatValue = d3.format(",.2f");
+		var formatCurrency = function(d) { return "$" + formatValue(d); };
 
 		// Bisection function - returns index of array nearest to current x
 		var bisectDate = d3.bisector(function(d) {
 			return d.date;
 		}).left;
-
-		// Formatting functions
-		var formatValue = d3.format(",.2f");
-		var formatCurrency = function(d) { return "$" + formatValue(d); };
-
-		// Focus that displays circle at intersection of chart and vertical line
-		var focus = svg.append("g")
-			.attr("class", "focus")
-			.style("display", "none")
-
-		focus.append("circle")
-			.attr("r", 4.5);
-
-		// Shows text on left side of focus
-		// focus.append("text")
-		// 	.attr("x", -82)
-		// 	.attr("dy", ".35em");
-
-		svg.append("rect")
-			.attr("class", "overlay")
-			.attr("width", width)
-			.attr("height", height)
-			.on("mouseover", function() {
-				focus.style("display", null);
-			})
-			.on("mouseout", function() {
-				focus.style("display", null);
-			})
-			.on("mousemove", mousemove);
-
-		// Updates focus
-		function mousemove() {
-			var d = getNearestX(this);
-			// Note: Use x(d.date) for x translation if the point needs to be exactly on the date
-			// This implementation forces the focus circle to always follow the mouse (in sync with vertical line)
-			focus.attr("transform", "translate(" + d3.mouse(this)[0] + "," + y(d.actual) + ")");
-			focus.select("text").text(formatCurrency(d.actual));
-		}
-
-
 
 		// Bisects the mouse's x position to obtain the nearest value in the data array
 		function getNearestX(elem, offset) {
@@ -584,7 +499,98 @@ function draw_line_graph() {
 
 
 
+		// Vertical line that moves with mouse
+		var vertical = d3.select("#display")
+	        .append("div")
+	        .attr("class", "remove vertical")
+	        .style("position", "absolute")
+	        .style("z-index", "19")
+	        .style("width", "1px")
+	        .style("height", height + "px")
+	        .style("top", margin["top"] + "px")
+	        .style("bottom", "30px")
+	        .style("left", "0")
+			.style("margin-left", "30%")
+	        .style("background", "#555");
 
+		// Mouse event listeners on display
+  		d3.select("#display")
+			.on("mousemove", function() {
+				d3.selectAll(".vertical").classed("hidden", false);
+				d3.selectAll(".focus").classed("hidden", false);
+
+				mousex = d3.mouse(this)[0];
+				vertical.style("left", mousex + "px");
+
+				// Updates the tooltip position and value
+				var d = getNearestX(this, 80);
+				d3.select("#tooltip")
+					.style("left", d3.mouse(this)[0] + 20 + "px")
+					.style("top", d3.mouse(this)[1] - 50 + "px")
+					.classed("hidden", false);
+				d3.select("#tooltip-date")
+					.text($.format.date(d.date, "ddd MMM d, yyyy"));
+				// Removes any old tooltip algorithm divs
+				$(".tooltip-algorithm").remove();
+				// Loops through each algorithm in data object to show each one's price
+				for (var key in d) {
+					if (d.hasOwnProperty(key)) {
+						if (key != "date") {
+							$("#tooltip").append('<div class="tooltip-algorithm" id="tooltip-algorithm-' + key + '"</div>');
+							$("#tooltip-algorithm-" + key).append("<p>" + full_algo_name(key) + "</p>");
+							$("#tooltip-algorithm-" + key).append("<p>" + formatCurrency(d[key]) + "</p>");
+						}
+					}
+				}
+			})
+			.on("mouseout", function() {
+				d3.select("#tooltip").classed("hidden", true);
+				d3.selectAll(".vertical").classed("hidden", true);
+				d3.selectAll(".focus").classed("hidden", true);
+			});
+
+
+
+		// Focus that displays circle at intersection of chart and vertical line
+		var foci = [];
+		var focus;
+		for (var i = 0; i < algorithms.length; i++) {
+			focus = svg.append("g")
+				.attr("class", "focus")
+				.style("display", "none")
+			foci.push(focus);
+			focus.append("circle")
+				.attr("r", 4.5);
+		}
+
+		svg.append("rect")
+			.attr("class", "overlay")
+			.attr("width", width)
+			.attr("height", height)
+			.on("mouseover", function() {
+				for (var i = 0; i < foci.length; i++) {
+					foci[i].style("display", null);
+				}
+			})
+			.on("mouseout", function() {
+				for (var i = 0; i < foci.length; i++) {
+					foci[i].style("display", null);
+				}
+			})
+			.on("mousemove", function() {
+				var d = getNearestX(this);
+				// Note: Use x(d.date) for x translation if the point needs to be exactly on the date
+				// This implementation forces the focus circle to always follow the mouse (in sync with vertical line)
+				var i = 0;
+				for (var key in d) {
+					if (d.hasOwnProperty(key)) {
+						if (key != "date") {
+							foci[i].attr("transform", "translate(" + d3.mouse(this)[0] + "," + y(d[key]) + ")");
+							i++;
+						}
+					}
+				}
+			});
 	});
 }
 

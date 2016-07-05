@@ -90,7 +90,7 @@ def get_all_data():
 						for abs_min_val in abs_min[abs_key]:
 							for loc_min_val in loc_min[abs_key]:
 								if abs_min_val == loc_min_val:
-									print "REMOVING MIN"
+									# print "REMOVING MIN"
 									loc_min[abs_key].remove(loc_min_val)
 					except:
 						pass
@@ -99,7 +99,7 @@ def get_all_data():
 						for abs_max_val in abs_max[abs_key]:
 							for loc_max_val in loc_max[abs_key]:
 								if abs_max_val == loc_max_val:
-									print "REMOVING MAX"
+									# print "REMOVING MAX"
 									loc_max[abs_key].remove(loc_max_val)
 					except:
 						pass
