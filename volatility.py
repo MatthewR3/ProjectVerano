@@ -5,7 +5,7 @@ import get_data as gd
 
 # Returns results in format:
 # Note that start date and end date will be in individual lists within the list of high or low volatility
-# {"high_vol="Start": "__DATE__", "End": "__Date__"}, {"low_vol = "Start": "__DATE__", "End": __DATE__"}
+# low_vol = {"Start": __DATE__, "End": __Date__}, high_vol = {"Start": __DATE__, "End": __DATE__}
 
 # Essentially, this function looks to see if the index differs by more than 0.5% from the previous day's price (this percentage could
 # obviously be adjusted). When it does differ by more than the set percentage, we consider it to have high volatility. We record
@@ -17,10 +17,8 @@ import get_data as gd
 
 
 def low_high_vol(start_date, end_date, train_date):
+
 	all_data = gd.get_hist_sp(start_date, end_date)
-	#print all_data
-	train_data = gd.get_hist_sp(start_date, train_date)
-	#print train_data
 
 	low_vol = [] # list of lists
 	high_vol = [] # list of lists
@@ -35,7 +33,7 @@ def low_high_vol(start_date, end_date, train_date):
 
 	# Tallies that will be used to keep track of days in a row (remember, must get to 3)
 	i = 0 # will be used for low volatility
-	j = 0 # WIll be used for high volatility
+	j = 0 # will be used for high volatility
 
 
 	for dct in all_data:
