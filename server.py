@@ -7,6 +7,7 @@ import get_data as gd
 import algorithms as algo
 import abs_min_max
 import loc_min_max
+import volatility
 
 app = Flask(__name__)
 
@@ -35,7 +36,7 @@ def get_all_data():
 
 	# Converts request.data (JSON string) to python dict
 	params = json.loads(request.data)
-	#print params
+
 	start_date = params["start_date"]
 	end_date = params["end_date"]
 	train_date = params["train_date"]
@@ -43,6 +44,7 @@ def get_all_data():
 	options = params["options"]
 	abs_extrema_options = params["abs_extrema_options"]
 	loc_extrema_options = params["loc_extrema_options"]
+	vol_regions_options = params["vol_regions_options"]
 
 	data = []
 	actual_data = gd.get_hist_sp(start_date, end_date)
@@ -60,10 +62,16 @@ def get_all_data():
 	if 3 in algorithms:
 		pass
 
+
+
+	#OPTIONS
+
 	loc_min = {}
 	loc_max = {}
 	abs_min = {}
 	abs_max = {}
+	low_vol_regions = {}
+	high_vol_regions = {}
 
 	# Absolute extrema
 	if 0 in options:
@@ -104,9 +112,40 @@ def get_all_data():
 					except:
 						pass
 
+	if 2 in options:
+		print "Volatility detected"
+		names = ["actual", "slope_analysis", "pt_analysis", "moving_avg"]
+		for num in vol_regions_options:
+			low_vol, high_vol = volatility.low_high_vol(data, names[num])
+
+			# TODO: When volatility.py is converted to the new format, comment these next two blocks out to see if it shows on the graph
+			new_low_vol = []
+			for x in low_vol:
+				end_date = x[0]
+				start_date = x[1]
+				new_low_vol.append({"start": start_date, "end": end_date})
+
+			new_high_vol = []
+			for x in high_vol:
+				end_date = x[0]
+				start_date = x[1]
+				new_high_vol.append({"start": start_date, "end": end_date})
+
+			print low_vol
+			print high_vol
+			print ""
+			print new_low_vol
+			print new_high_vol
+
+			# TODO: Also change these to just low_vol and high_vol
+			low_vol_regions[names[num]] = new_low_vol
+			high_vol_regions[names[num]] = new_high_vol
 
 
-	all_data = {"data": data, "abs_min": abs_min, "abs_max": abs_max, "loc_min": loc_min, "loc_max": loc_max}
+
+
+	all_data = {"data": data, "abs_min": abs_min, "abs_max": abs_max, "loc_min": loc_min, "loc_max": loc_max,
+				"low_vol_regions": low_vol_regions, "high_vol_regions": high_vol_regions}
 
 	return json.dumps(all_data)
 

@@ -156,15 +156,18 @@ li:hover {
 	background-color: #B6CFE3;
 }
 
-#abs-options, #loc-options {
+/* All options */
+#abs-options, #loc-options, #vol-options {
 	display: none;
 }
 
-#loc-extrema {
+/* Last option */
+#vol {
 	border-bottom: 1px solid #D6D6D6 !important;
 }
 
-#abs-options > li, #loc-options > li {
+/* All options */
+#abs-options > li, #loc-options > li, #vol-options > li {
 	width: 60%;
 	margin-left: 20%;
 	margin-right: 20%;
@@ -172,11 +175,13 @@ li:hover {
 	border-right: 1px solid #D6D6D6;
 }
 
-#abs-options > li:first-child, #loc-options > li:first-child {
+/* All options */
+#abs-options > li:first-child, #loc-options > li:first-child, #vol-options > li:first-child {
 	border-top: none;
 }
 
-#abs-options > li:last-child {
+/* All options except last */
+#abs-options > li:last-child, #loc-options > li:last-child {
 	border-bottom: none;
 }
 
@@ -306,6 +311,14 @@ input[type="submit"]:active, input[type="button"]:active {
 	stroke: #555;
 	stroke-width: 1px;
 	z-index: 999;
+}
+
+.low_vol_region {
+	fill: rgba(75, 175, 75, .3);
+}
+
+.high_vol_region {
+	fill: rgba(175, 75, 75, .3);
 }
 
 /* Visualization tooltip */

@@ -12,7 +12,7 @@ $(document).ready(function() {
 	$("li").click(function() {
 		if ($(this).css("border-right-width") == "10px") {
 			// Checks to see if it is an inner options li
-			if ($(this).parent().prev().is(".extrema-options")) $(this).css("border-right", "1px solid #D6D6D6");
+			if ($(this).parent().prev().is(".extrema-options, .vol-options")) $(this).css("border-right", "1px solid #D6D6D6");
 			else $(this).css("border-right", "none");
 			$(this).css("padding-left", "0");
 		}
@@ -23,12 +23,12 @@ $(document).ready(function() {
 	});
 
 	// If absolute extrema option is clicked, show algorithms and select first child (actual)
-	$(".extrema-options").click(function() {
+	$(".extrema-options, .vol-options").click(function() {
 		slideOptions(this);
 	});
 
 	// Detects whether any inner li in extrema options are selected and selects parent accordingly
-	$(".extrema-options").next().children().click(function() {
+	$(".extrema-options, .vol-options").next().children().click(function() {
 		var enabled = false;
 		$(this).parent().children().each(function() {
 			if ($(this).css("border-right-width") == "10px") {
@@ -101,19 +101,24 @@ function fill_defaults() {
 	$("li").css("padding-left", "0");
 	$("#algorithms").next().children().slice(0, 2).css("border-right", "10px solid #9CBCD6");
 	$("#algorithms").next().children().slice(0, 2).css("padding-left", "10px");
-	$("#options + ul > li").slice(0, 2).css("border-right", "10px solid #9CBCD6");
-	$("#options + ul > li").slice(0, 2).css("padding-left", "10px");
+	$("#options + ul > li").slice(0, 3).css("border-right", "10px solid #9CBCD6");
+	$("#options + ul > li").slice(0, 3).css("padding-left", "10px");
 	// Resets the borders on inner li in options
 	$(".extrema-options + ul > li").css("border-right", "1px solid #D6D6D6");
 	$(".extrema-options + ul > li").css("padding-left", "0");
-	// Fills in first 2 algorithms
+	$(".vol-options + ul > li").css("border-right", "1px solid #D6D6D6");
+	$(".vol-options + ul > li").css("padding-left", "0");
+	// Fills in first 2 algorithms for each algorithm
 	$("#abs-options > li").slice(0, 2).css("border-right", "10px solid #9CBCD6");
 	$("#abs-options > li").slice(0, 2).css("padding-left", "10px");
 	$("#loc-options > li").slice(0, 2).css("border-right", "10px solid #9CBCD6");
 	$("#loc-options > li").slice(0, 2).css("padding-left", "10px");
+	$("#vol-options > li").slice(0, 2).css("border-right", "10px solid #9CBCD6");
+	$("#vol-options > li").slice(0, 2).css("padding-left", "10px");
 
 	slideOptions("#abs-extrema", {"force_down": true});
 	slideOptions("#loc-extrema", {"force_down": true});
+	slideOptions("#vol", {"force_down": true});
 
 	validate_input();
 }
@@ -176,7 +181,7 @@ function validate_input() {
 
 	// Checks options lists to make sure there aren't options selected for an algorithm that is not selected
 	var valid = true;
-	$(".extrema-options").next().children().each(function() {
+	$(".extrema-options, .vol-options").next().children().each(function() {
 		if ($(this).css("border-right-width") == "10px" && selected_algos.indexOf($(this).val()) == -1) {
 			valid = false;
 		}
@@ -291,6 +296,14 @@ function draw_line_graph() {
 		}
 	});
 
+	// Collects selected volatility regions algorithm values
+	var vol_regions_options = [];
+	$("#vol-options").children().each(function() {
+		if ($(this).css("border-right-width") == "10px") {
+			vol_regions_options.push($(this).val());
+		}
+	});
+
 
 
 	// Sets up SVG elements
@@ -304,8 +317,8 @@ function draw_line_graph() {
 	// Sets the dimensions of the canvas / graph
 	var max_x = $("#display").width();
 	var max_y = $("#display").height();
-	var margin = {top: 20, right: 180, bottom: 30, left: 80},
-	width = max_x - margin.left - margin.right,
+	margin = {top: 20, right: 180, bottom: 30, left: 80};
+	width = max_x - margin.left - margin.right;
 	height = max_y - margin.top - margin.bottom - 20;
 
 	// console.log(width);
@@ -348,7 +361,7 @@ function draw_line_graph() {
 	// Gets the data
 
 	var request_data = {"start_date": start_date, "end_date": end_date, "train_date": train_date, "algorithms": algorithms, "options": options,
-						"abs_extrema_options": abs_extrema_options, "loc_extrema_options": loc_extrema_options};
+						"abs_extrema_options": abs_extrema_options, "loc_extrema_options": loc_extrema_options, "vol_regions_options": vol_regions_options};
 
 	// NOTE: make sure to stringify objects before sending request
 	d3.json("/ajax/get_data/").post(JSON.stringify(request_data), function(error, all_data) {
@@ -360,6 +373,8 @@ function draw_line_graph() {
 		var abs_max = all_data["abs_max"];
 		var loc_min = all_data["loc_min"];
 		var loc_max = all_data["loc_max"];
+		var low_vol = all_data["low_vol_regions"];
+		var high_vol = all_data["high_vol_regions"];
 
 		// Sorts the data by descending date (later date --> larger index)
 		data.sort(function(a, b) {
@@ -450,6 +465,8 @@ function draw_line_graph() {
 		absolute_extrema(abs_min, abs_max, abs_extrema_options, svg, x, y, parseDate);
 		local_extrema(loc_min, loc_max, loc_extrema_options, svg, x, y, parseDate);
 
+		// Functions for adding volatility regions
+		vol_regions(low_vol, high_vol, vol_regions_options, svg, x, parseDate);
 
 
 		// Formatting functions
@@ -471,6 +488,9 @@ function draw_line_graph() {
 			// Gets date immediately before mouse and compares to date at mouse to see which one is closer
 			var d0 = data[i - 1];
 			var d1 = data[i];
+			if (d0 === undefined || d1 === undefined) {
+				return null;
+			}
 			var d = x0 - d0.date > d1.date - x0 ? d1 : d0;
 			return d;
 		}
@@ -487,21 +507,22 @@ function draw_line_graph() {
 			.style("height", height + "px")
 			.style("top", margin["top"] + "px")
 			.style("bottom", "30px")
-			.style("left", "0")
+			.style("left", "80px")
 			.style("margin-left", "30%")
 			.style("background", "#555");
 
 		// Mouse event listeners on display
   		d3.select("#display")
 			.on("mousemove", function() {
+
+				var d = getNearestX(this, 80);
+				// If mouse is not inside display
+				if (d3.mouse(this)[0] < 80 || d == null) return;
+
 				d3.selectAll(".vertical").classed("hidden", false);
 				d3.selectAll(".focus").classed("hidden", false);
 
-				mousex = d3.mouse(this)[0];
-				vertical.style("left", mousex + "px");
-
 				// Updates the tooltip position and value
-				var d = getNearestX(this, 80);
 				d3.select("#tooltip")
 					.style("left", d3.mouse(this)[0] + 20 + "px")
 					.style("top", d3.mouse(this)[1] - 50 + "px")
@@ -520,6 +541,10 @@ function draw_line_graph() {
 						}
 					}
 				}
+
+				// Updates the vertical bar
+				mousex = d3.mouse(this)[0];
+				vertical.style("left", mousex + "px");
 			})
 			.on("mouseout", function() {
 				d3.select("#tooltip").classed("hidden", true);
@@ -557,6 +582,7 @@ function draw_line_graph() {
 			})
 			.on("mousemove", function() {
 				var d = getNearestX(this);
+				if (d == null) return;
 				// Note: Use x(d.date) for x translation if the point needs to be exactly on the date
 				// This implementation forces the focus circle to always follow the mouse (in sync with vertical line)
 				var i = 0;
@@ -572,6 +598,8 @@ function draw_line_graph() {
 	});
 }
 
+
+
 // Adds absolute extrema to the visualization
 // The for loop goes through all algorithms where absolute extrema are enabled
 function absolute_extrema(abs_min, abs_max, abs_extrema_options, svg, x, y, parseDate) {
@@ -586,7 +614,7 @@ function absolute_extrema(abs_min, abs_max, abs_extrema_options, svg, x, y, pars
 		var node = svg.selectAll("node")
 			.data(abs_min[algo])
 				.enter().append("g")
-			.attr("class", "node")
+			.attr("class", "node");
 
 		node.append("circle")
 			.attr("r", 4)
@@ -611,7 +639,7 @@ function absolute_extrema(abs_min, abs_max, abs_extrema_options, svg, x, y, pars
 		var node = svg.selectAll("node")
 			.data(abs_max[algo])
 				.enter().append("g")
-			.attr("class", "node")
+			.attr("class", "node");
 
 		node.append("circle")
 			.attr("r", 4)
@@ -643,7 +671,7 @@ function local_extrema(loc_min, loc_max, loc_extrema_options, svg, x, y, parseDa
 		var node = svg.selectAll("node")
 			.data(loc_min[algo])
 				.enter().append("g")
-			.attr("class", "node")
+			.attr("class", "node");
 
 		node.append("circle")
 			.attr("r", 4)
@@ -668,7 +696,7 @@ function local_extrema(loc_min, loc_max, loc_extrema_options, svg, x, y, parseDa
 		var node = svg.selectAll("node")
 			.data(loc_max[algo])
 				.enter().append("g")
-			.attr("class", "node")
+			.attr("class", "node");
 
 		node.append("circle")
 			.attr("r", 4)
@@ -685,3 +713,51 @@ function local_extrema(loc_min, loc_max, loc_extrema_options, svg, x, y, parseDa
 			.text(function(d) { return d.text; });
 	}
 };
+
+
+
+// Draws regions on graph of high and low volatility
+function vol_regions(low_vol_regions, high_vol_regions, vol_regions_options, svg, x, parseDate) {
+
+	// Low volatility regions
+	for (var i = 0; i < vol_regions_options.length; i++) {
+
+		algo = ALGO_NAMES[vol_regions_options[i]];
+
+		var region = svg.selectAll("region")
+			.data(low_vol_regions[algo])
+				.enter().append("g")
+			.attr("class", "region")
+			.attr("class", "low_vol_region");
+
+		region.append("rect")
+			.attr("x", function(d) {
+				return x(parseDate(d.start));
+			 })
+			.attr("y", function(d) { return margin.top - 20; })
+			.attr("width", function(d) { return x(new Date(d.end)) - x(new Date(d.start)); })
+			.attr("height", height);
+
+	}
+
+	// High volatility regions
+	for (var i = 0; i < vol_regions_options.length; i++) {
+
+		algo = ALGO_NAMES[vol_regions_options[i]];
+
+		var region = svg.selectAll("region")
+			.data(high_vol_regions[algo])
+				.enter().append("g")
+			.attr("class", "region")
+			.attr("class", "high_vol_region");
+
+		region.append("rect")
+			.attr("x", function(d) {
+				return x(parseDate(d.start));
+			 })
+			.attr("y", function(d) { return margin.top - 20; })
+			.attr("width", function(d) { return x(new Date(d.end)) - x(new Date(d.start)); })
+			.attr("height", height);
+
+	}
+}
