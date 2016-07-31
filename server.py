@@ -8,6 +8,7 @@ import algorithms as algo
 import abs_min_max
 import loc_min_max
 import volatility
+import indicators
 
 app = Flask(__name__)
 
@@ -41,6 +42,7 @@ def get_all_data():
 	end_date = params["end_date"]
 	train_date = params["train_date"]
 	algorithms = params["algorithms"]
+	indicators_options = params["indicators_options"]
 	options = params["options"]
 	abs_extrema_options = params["abs_extrema_options"]
 	loc_extrema_options = params["loc_extrema_options"]
@@ -61,6 +63,15 @@ def get_all_data():
 	# Moving Average - code: moving_avg
 	if 3 in algorithms:
 		pass
+
+
+
+	# INDICATORS
+
+	indicators_val = []
+	# Volatility indicator
+	if "vol" in indicators_options:
+		indicators_val.append(["vol", indicators_options["vol"], indicators.vol(data, "actual", indicators_options["vol"])])
 
 
 
@@ -145,7 +156,7 @@ def get_all_data():
 
 
 	all_data = {"data": data, "abs_min": abs_min, "abs_max": abs_max, "loc_min": loc_min, "loc_max": loc_max,
-				"low_vol_regions": low_vol_regions, "high_vol_regions": high_vol_regions}
+				"low_vol_regions": low_vol_regions, "high_vol_regions": high_vol_regions, "indicators": indicators_val}
 
 	return json.dumps(all_data)
 

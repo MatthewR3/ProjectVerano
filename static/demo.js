@@ -2,6 +2,8 @@ $(document).ready(function() {
 
 	// Global variable for keeping track of algorithm names by index
 	ALGO_NAMES = ["actual", "slope_analysis", "pt_analysis", "moving_avg"];
+	// Global variable for keeping track of indicator names by index
+	IND_NAMES = ["vol", "var"];
 
 	console.log("jQuery Loaded");
 	if (d3) {
@@ -99,25 +101,28 @@ function fill_defaults() {
 	// Clears inputs then fills in first 2 algorithms and first 2 options
 	$("li").css("border-right", "none");
 	$("li").css("padding-left", "0");
-	$("#algorithms").next().children().slice(0, 2).css("border-right", "10px solid #9CBCD6");
-	$("#algorithms").next().children().slice(0, 2).css("padding-left", "10px");
-	$("#options + ul > li").slice(0, 3).css("border-right", "10px solid #9CBCD6");
-	$("#options + ul > li").slice(0, 3).css("padding-left", "10px");
+	$("#algorithms").next().children().slice(0, 1).css("border-right", "10px solid #9CBCD6");
+	$("#algorithms").next().children().slice(0, 1).css("padding-left", "10px");
+	$("#options + ul > li").slice(2, 3).css("border-right", "10px solid #9CBCD6");
+	$("#options + ul > li").slice(2, 3).css("padding-left", "10px");
+	// Fills in first indicator
+	$("#indicators + ul > li").slice(0, 1).css("border-right", "10px solid #9CBCD6");
+	$("#indicators + ul > li").slice(0, 1).css("padding-left", "10px");
 	// Resets the borders on inner li in options
 	$(".extrema-options + ul > li").css("border-right", "1px solid #D6D6D6");
 	$(".extrema-options + ul > li").css("padding-left", "0");
 	$(".vol-options + ul > li").css("border-right", "1px solid #D6D6D6");
 	$(".vol-options + ul > li").css("padding-left", "0");
-	// Fills in first 2 algorithms for each algorithm
-	$("#abs-options > li").slice(0, 2).css("border-right", "10px solid #9CBCD6");
-	$("#abs-options > li").slice(0, 2).css("padding-left", "10px");
-	$("#loc-options > li").slice(0, 2).css("border-right", "10px solid #9CBCD6");
-	$("#loc-options > li").slice(0, 2).css("padding-left", "10px");
-	$("#vol-options > li").slice(0, 2).css("border-right", "10px solid #9CBCD6");
-	$("#vol-options > li").slice(0, 2).css("padding-left", "10px");
+	// Fills in first 2 algorithms for each option
+	// $("#abs-options > li").slice(0, 2).css("border-right", "10px solid #9CBCD6");
+	// $("#abs-options > li").slice(0, 2).css("padding-left", "10px");
+	// $("#loc-options > li").slice(0, 2).css("border-right", "10px solid #9CBCD6");
+	// $("#loc-options > li").slice(0, 2).css("padding-left", "10px");
+	$("#vol-options > li").slice(0, 1).css("border-right", "10px solid #9CBCD6");
+	$("#vol-options > li").slice(0, 1).css("padding-left", "10px");
 
-	slideOptions("#abs-extrema", {"force_down": true});
-	slideOptions("#loc-extrema", {"force_down": true});
+	// slideOptions("#abs-extrema", {"force_down": true});
+	// slideOptions("#loc-extrema", {"force_down": true});
 	slideOptions("#vol", {"force_down": true});
 
 	validate_input();
@@ -243,6 +248,22 @@ function full_algo_name(code) {
 	return code
 }
 
+function full_indicator_name(code) {
+	if (code == "vol") return "Volatility Indicator";
+	return code
+}
+
+// Finds closing price of given data on the given date
+function priceAtDate(data, date) {
+	for (var i = 0; i < data.length; i++) {
+		// If difference between dates is less than 3 days worth of milliseconds (to account for weekends)
+		if ((new Date(date).getTime()) - (new Date(data[i]["date"]).getTime()) < 259200000) {
+			return data[i]["actual"];
+		}
+	}
+	return data[0]["actual"];
+}
+
 
 
 // GRAPHING FUNCTIONS
@@ -269,6 +290,13 @@ function draw_line_graph() {
 	$("#algorithms").next().children().each(function() {
 		if ($(this).css("border-right-width") == "10px") {
 			algorithms.push($(this).val());
+		}
+	});
+
+	var indicators_options = {};
+	$("#indicators").next().children().filter("li").each(function() {
+		if ($(this).css("border-right-width") == "10px") {
+			indicators_options[IND_NAMES[$(this).index()]] = $(this).next().val();
 		}
 	});
 
@@ -360,8 +388,9 @@ function draw_line_graph() {
 
 	// Gets the data
 
-	var request_data = {"start_date": start_date, "end_date": end_date, "train_date": train_date, "algorithms": algorithms, "options": options,
-						"abs_extrema_options": abs_extrema_options, "loc_extrema_options": loc_extrema_options, "vol_regions_options": vol_regions_options};
+	var request_data = {"start_date": start_date, "end_date": end_date, "train_date": train_date, "algorithms": algorithms,
+						"indicators_options": indicators_options, "options": options, "abs_extrema_options": abs_extrema_options,
+						"loc_extrema_options": loc_extrema_options, "vol_regions_options": vol_regions_options,};
 
 	// NOTE: make sure to stringify objects before sending request
 	d3.json("/ajax/get_data/").post(JSON.stringify(request_data), function(error, all_data) {
@@ -369,6 +398,7 @@ function draw_line_graph() {
 
 		// gets price data
 		var data = all_data["data"];
+		var indicators = all_data["indicators"];
 		var abs_min = all_data["abs_min"];
 		var abs_max = all_data["abs_max"];
 		var loc_min = all_data["loc_min"];
@@ -460,6 +490,9 @@ function draw_line_graph() {
 			.text(function(d) { return d.name; });
 
 
+
+		// Functions for adding indicators
+		plot_indicators(indicators, data, svg, x, y, parseDate);
 
 		// Functions for adding extrema
 		absolute_extrema(abs_min, abs_max, abs_extrema_options, svg, x, y, parseDate);
@@ -600,6 +633,35 @@ function draw_line_graph() {
 
 
 
+// Plots indicators (currently only +/- indicators) as circles on the graph
+// Indicators are in the format of [__NAME__, __DATE__, __RESULT__]
+function plot_indicators(indicators, data, svg, x, y, parseDate) {
+
+	var node = svg.selectAll("node")
+		.data(indicators)
+			.enter().append("g")
+		.attr("class", "indicator");
+
+	node.append("circle")
+		.attr("r", 10)
+		.attr("cx", function(d) {
+			return x(parseDate(d[1])); })
+		.attr("cy", function(d) { return y(priceAtDate(data, parseDate(d[1]))); })
+		.attr("fill", function(d) {
+			if (d[2] == true) return "#71C974";
+			else return "#FF9696";
+		});
+
+	node.append("text")
+		.attr("transform", function(d) { return "translate(" + x(parseDate(d[1])) + "," + y(priceAtDate(data, parseDate(d[1]))) + ")"; })
+		.attr("x", 12)
+		.attr("dy", ".3em")
+		.text(function(d) { return full_indicator_name(d[0]); });
+
+}
+
+
+
 // Adds absolute extrema to the visualization
 // The for loop goes through all algorithms where absolute extrema are enabled
 function absolute_extrema(abs_min, abs_max, abs_extrema_options, svg, x, y, parseDate) {
@@ -614,7 +676,7 @@ function absolute_extrema(abs_min, abs_max, abs_extrema_options, svg, x, y, pars
 		var node = svg.selectAll("node")
 			.data(abs_min[algo])
 				.enter().append("g")
-			.attr("class", "node");
+			.attr("class", "extrema");
 
 		node.append("circle")
 			.attr("r", 4)
@@ -639,7 +701,7 @@ function absolute_extrema(abs_min, abs_max, abs_extrema_options, svg, x, y, pars
 		var node = svg.selectAll("node")
 			.data(abs_max[algo])
 				.enter().append("g")
-			.attr("class", "node");
+			.attr("class", "extrema");
 
 		node.append("circle")
 			.attr("r", 4)
@@ -671,7 +733,7 @@ function local_extrema(loc_min, loc_max, loc_extrema_options, svg, x, y, parseDa
 		var node = svg.selectAll("node")
 			.data(loc_min[algo])
 				.enter().append("g")
-			.attr("class", "node");
+			.attr("class", "extrema");
 
 		node.append("circle")
 			.attr("r", 4)
@@ -696,7 +758,7 @@ function local_extrema(loc_min, loc_max, loc_extrema_options, svg, x, y, parseDa
 		var node = svg.selectAll("node")
 			.data(loc_max[algo])
 				.enter().append("g")
-			.attr("class", "node");
+			.attr("class", "extrema");
 
 		node.append("circle")
 			.attr("r", 4)

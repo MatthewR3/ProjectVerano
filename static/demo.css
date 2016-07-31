@@ -74,7 +74,7 @@ input[type="submit"].disabled {
 
 }
 
-#algorithms, #options {
+#algorithms, #indicators, #options {
 	margin-top: 50px;
 }
 
@@ -154,6 +154,37 @@ li:hover {
 	cursor: pointer;
 	/*background-color: #B6C9D9;*/
 	background-color: #B6CFE3;
+}
+
+.indicator {
+	width: 50%;
+	display: inline-block;
+}
+
+/* Hack to add bottom border on li (works for input though) */
+#indicators + ul li:last-of-type {
+	border-bottom: 1px solid #D6D6D6;
+}
+
+.indicator-date {
+	width: 50%;
+	height: 50px;
+	line-height: 50px;
+	display: inline-block;
+	font-size: 20px;
+	border: none;
+	border-top: 1px solid #D6D6D6;
+	background-color: inherit;
+	text-align: center;
+	color: inherit;
+}
+
+.indicator-date:last-child {
+	border-bottom: 1px solid #D6D6D6;
+}
+
+.indicator-date:focus {
+	outline: none;
 }
 
 /* All options */
@@ -289,11 +320,11 @@ input[type="submit"]:active, input[type="button"]:active {
 	stroke-width: 1.5px;
 }
 
-.node circle {
+.extrema circle {
 	fill: #555;
 }
 
-.node text {
+.extrema text {
 	fill: #555;
 }
 

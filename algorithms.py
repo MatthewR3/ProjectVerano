@@ -1,10 +1,16 @@
 import get_data as gd
 
+# Algorithms are overlayed graphs that are trained on actual data to attempt to replicate the performance of that data
+# start_date:  date at which both the actual data graph and the overlayed graphs start
+# end_date: date at which both the actual data graph and the overlayed graphs end
+# train_date: date at which the actual data and the overlayed graphs deviate because the algorithm is attempting to predict
+#     the market performance independent of the actual data
+
 # All dates should use format YYYY-MM-DD
 
 # Data obtained from get_data is in the format of:
 #	[{"date": STRING, "ALGO_CODE": FLOAT}, {"date": STRING, "ALGO_CODE": FLOAT}, ...]
-# This is also the data structure that should be returned by the algorithms
+# This is also the format that should be returned by the algorithms
 
 # Algorithms are ordered by their value as displayed in the demo, starting with 1
 
@@ -35,4 +41,4 @@ def slope_analysis(start_date, end_date, train_date):
 
 
 if __name__ == "__main__":
-	print slope("1995-1-1", "1995-3-1", "1995-2-1")
+	print slope_analysis("1995-1-1", "1995-3-1", "1995-2-1")
